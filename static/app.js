@@ -44,6 +44,61 @@ dropzone.addEventListener("keydown", (e) => {
 
 analyzeBtn.addEventListener("click", analyze);
 
+// ---- selfie camera ----
+const selfieBtn = $("selfieBtn");
+const camera = $("camera");
+const video = $("video");
+const captureBtn = $("captureBtn");
+const cancelCam = $("cancelCam");
+let stream = null;
+
+selfieBtn.addEventListener("click", openCamera);
+cancelCam.addEventListener("click", closeCamera);
+captureBtn.addEventListener("click", capture);
+
+async function openCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" }, audio: false,
+    });
+    video.srcObject = stream;
+    camera.hidden = false;
+    selfieBtn.hidden = true;
+    hint.textContent = "";
+  } catch (err) {
+    hint.textContent =
+      "Couldn't open the camera — allow camera access, or just upload a photo.";
+  }
+}
+
+function closeCamera() {
+  if (stream) {
+    stream.getTracks().forEach((t) => t.stop());
+    stream = null;
+  }
+  camera.hidden = true;
+  selfieBtn.hidden = false;
+}
+
+function capture() {
+  const w = video.videoWidth, h = video.videoHeight;
+  if (!w || !h) return;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  canvas.getContext("2d").drawImage(video, 0, 0, w, h);
+  canvas.toBlob(
+    (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+      setFile(file);
+      closeCamera();
+    },
+    "image/jpeg",
+    0.92
+  );
+}
+
 async function analyze() {
   if (!selectedFile) return;
   analyzeBtn.classList.add("loading");

@@ -34,6 +34,16 @@
         <img id="preview" class="preview" alt="" hidden />
       </label>
 
+      <button class="selfie-btn" id="selfieBtn" type="button">📷 Take a selfie instead</button>
+
+      <div class="camera" id="camera" hidden>
+        <video id="video" autoplay playsinline muted></video>
+        <div class="camera-actions">
+          <button class="cta" id="captureBtn" type="button">Capture</button>
+          <button class="selfie-btn" id="cancelCam" type="button">Cancel</button>
+        </div>
+      </div>
+
       <button class="cta" id="analyzeBtn" disabled>Analyze my hair</button>
       <p class="hint" id="hint"></p>
     </section>
