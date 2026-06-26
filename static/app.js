@@ -7,6 +7,7 @@ const analyzeBtn = $("analyzeBtn");
 const hint = $("hint");
 
 let selectedFile = null;
+let lastCuts = null;
 
 function setFile(file) {
   if (!file || !file.type.startsWith("image/")) {
@@ -149,22 +150,12 @@ function render(data) {
 
   const cuts = data.haircuts || {};
   const cutsSection = $("cutsSection");
-  if (cuts.styles && cuts.styles.length) {
+  if (cuts.options && (cuts.options.women || cuts.options.men)) {
+    lastCuts = cuts;
     $("cutsShape").textContent = "· " + cuts.face_shape + " face";
     $("cutsSummary").textContent = cuts.summary || "";
-    $("cutCards").innerHTML = cuts.styles
-      .map((s, i) => `<div class="pcard">
-        <span class="slot">Cut</span>
-        <span class="pname">${s.name}</span>
-        <span class="why">${s.why || ""}</span>
-        <button class="preview-btn" data-cut="${s.name.replace(/"/g, "&quot;")}" data-i="${i}">Preview on me</button>
-        <div class="preview-slot" id="preview-${i}"></div>
-      </div>`)
-      .join("");
-    document.querySelectorAll(".preview-btn").forEach((btn) => {
-      btn.addEventListener("click", () => previewCut(btn));
-    });
     $("cutsAvoid").textContent = cuts.avoid ? "Skip: " + cuts.avoid : "";
+    setupToggle(cuts.default_tab || "women");
     cutsSection.hidden = false;
   } else {
     cutsSection.hidden = true;
@@ -172,6 +163,36 @@ function render(data) {
 
   report.hidden = false;
   report.scrollIntoView({ behavior: "smooth" });
+}
+
+function setupToggle(activeTab) {
+  const btns = document.querySelectorAll(".tog-btn");
+  btns.forEach((b) => {
+    b.classList.toggle("active", b.dataset.tab === activeTab);
+    b.onclick = () => {
+      btns.forEach((x) => x.classList.remove("active"));
+      b.classList.add("active");
+      renderCuts(b.dataset.tab);
+    };
+  });
+  renderCuts(activeTab);
+}
+
+function renderCuts(tab) {
+  if (!lastCuts) return;
+  const list = (lastCuts.options && lastCuts.options[tab]) || [];
+  $("cutCards").innerHTML = list
+    .map((s, i) => `<div class="pcard">
+      <span class="slot">Cut</span>
+      <span class="pname">${s.name}</span>
+      <span class="why">${s.why || ""}</span>
+      <button class="preview-btn" data-cut="${s.name.replace(/"/g, "&quot;")}" data-i="${i}">Preview on me</button>
+      <div class="preview-slot" id="preview-${i}"></div>
+    </div>`)
+    .join("");
+  document.querySelectorAll(".preview-btn").forEach((btn) => {
+    btn.addEventListener("click", () => previewCut(btn));
+  });
 }
 
 async function previewCut(btn) {

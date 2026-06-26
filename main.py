@@ -73,6 +73,11 @@ classify face_shape as one of: oval | round | square | heart | oblong |
 diamond. If the face is hidden, cropped, or it's only a hair close-up, set
 face_visible=false and face_shape="unknown". Never guess a face you can't see.
 
+STEP 5 - STYLE MENU (cosmetic only). To pick which haircut menu to show by
+default, estimate presentation as "feminine", "masculine", or "unclear". This
+is only a styling default the user can override - not an identity judgement.
+Use "unclear" whenever it is ambiguous.
+
 Return ONE JSON object only, no markdown, in EXACTLY this shape:
 
 {
@@ -86,6 +91,7 @@ Return ONE JSON object only, no markdown, in EXACTLY this shape:
   "scores": { "hydration_score": 72, "damage_score": 18, "frizz_score": 30, "shine_score": 65 },
   "face_visible": true,
   "face_shape": "oval",
+  "presentation": "feminine",
   "confidence": "high | medium | low",
   "confidence_note": "short reason for the confidence level"
 }
@@ -117,6 +123,7 @@ def _normalize(data: Dict[str, Any]) -> Dict[str, Any]:
     data.setdefault("porosity", "unknown")
     data.setdefault("face_visible", False)
     data.setdefault("face_shape", "unknown")
+    data.setdefault("presentation", "unclear")
     data.setdefault("confidence", "low")
     data.setdefault("confidence_note", "")
     scores = data.get("scores") or {}
