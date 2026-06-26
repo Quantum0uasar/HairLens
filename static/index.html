@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HairLens — AI hair analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-mark">◍</span>
+        <span class="brand-name">HairLens</span>
+      </div>
+      <p class="eyebrow">AI hair report · cosmetic, not medical</p>
+    </header>
+
+    <section class="hero">
+      <h1>Read your hair like a lab does.</h1>
+      <p class="lede">Upload one close-up photo. Get a scored profile — hydration,
+        damage, frizz, shine — plus a routine and cuts matched to what's actually there.</p>
+
+      <label class="dropzone" id="dropzone" for="file" tabindex="0">
+        <input type="file" id="file" accept="image/*" hidden />
+        <div class="dz-inner" id="dzInner">
+          <span class="dz-icon">⊕</span>
+          <span class="dz-title">Drop a photo or tap to upload</span>
+          <span class="dz-sub">Include your face for haircut suggestions</span>
+        </div>
+        <img id="preview" class="preview" alt="" hidden />
+      </label>
+
+      <button class="cta" id="analyzeBtn" disabled>Analyze my hair</button>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <section class="report" id="report" hidden>
+      <div class="report-grid">
+        <div class="report-photo">
+          <img id="reportImg" alt="Your uploaded hair" />
+          <p class="observation" id="observation"></p>
+        </div>
+
+        <div class="spec">
+          <div class="spec-head">
+            <span class="spec-label">Profile</span>
+            <span class="badge" id="confidence"></span>
+          </div>
+          <dl class="traits" id="traits"></dl>
+
+          <div class="spec-head"><span class="spec-label">Scores</span></div>
+          <div class="bars" id="bars"></div>
+        </div>
+      </div>
+
+      <div class="routine">
+        <h2>Your routine</h2>
+        <div class="cards" id="cards"></div>
+      </div>
+
+      <div class="cuts" id="cutsSection" hidden>
+        <h2>Recommended cuts <span class="cuts-shape" id="cutsShape"></span></h2>
+        <p class="cuts-summary" id="cutsSummary"></p>
+        <div class="cards" id="cutCards"></div>
+        <p class="cuts-avoid" id="cutsAvoid"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>HairLens · cosmetic guidance only, not medical advice</span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
