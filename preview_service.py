@@ -1,43 +1,30 @@
 """
-Haircut preview generator.
+Haircut preview generator (virtual try-on on the user's own photo).
 
-Takes the user's own uploaded photo and edits it to show a requested haircut,
-using OpenAI's image model (gpt-image-1 by default). This is a 'virtual try-on'
-on the user's own image. Output is clearly labeled an AI visualization.
-
-Setup note: the image model requires API Organization Verification at
-platform.openai.com/settings/organization/general (one-time).
+Uses input_fidelity="high" so the person's FACE is preserved across the edit
+(default is "low", which lets the face drift). Requires API Organization
+Verification for the image model.
 """
-import io
 import os
 from typing import Optional
 
-from PIL import Image
+from image_utils import to_png_buffer
 
 IMAGE_MODEL = os.getenv("HAIRLENS_IMAGE_MODEL", "gpt-image-1")
 IMAGE_QUALITY = os.getenv("HAIRLENS_IMAGE_QUALITY", "medium")  # low | medium | high
 
 
-def _to_png(image_bytes: bytes) -> io.BytesIO:
-    """Normalize any uploaded format to PNG so the edit endpoint is happy."""
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    buf.name = "photo.png"
-    return buf
-
-
 def generate_preview(client, image_bytes: bytes, cut_name: str) -> Optional[str]:
-    """Return a data: URL of the preview image, or raise with a clear message."""
-    photo = _to_png(image_bytes)
+    photo = to_png_buffer(image_bytes)
     prompt = (
-        f"Photorealistic edit of this exact person now wearing a '{cut_name}' "
-        "hairstyle. Keep their face, identity, skin tone, and facial features "
-        "completely unchanged - only change the hair. Clean head-and-shoulders "
-        "portrait, natural lighting, neutral background."
+        f"Change ONLY this person's hairstyle to a '{cut_name}'. "
+        "Keep everything else identical: the exact same face, facial features, "
+        "bone structure, skin tone, eye colour, eyebrows, expression, apparent "
+        "age, makeup, clothing, lighting, framing, and background. Do not "
+        "beautify, slim, age, or otherwise alter the face. The person must "
+        "stay clearly recognizable as the same individual. Photorealistic."
     )
-    result = client.images.edit(
+    kwargs = dict(
         model=IMAGE_MODEL,
         image=photo,
         prompt=prompt,
@@ -45,5 +32,8 @@ def generate_preview(client, image_bytes: bytes, cut_name: str) -> Optional[str]
         quality=IMAGE_QUALITY,
         n=1,
     )
-    b64 = result.data[0].b64_json
-    return f"data:image/png;base64,{b64}"
+    if not IMAGE_MODEL.startswith("gpt-image-2"):
+        kwargs["input_fidelity"] = "high"
+
+    result = client.images.edit(**kwargs)
+    return f"data:image/png;base64,{result.data[0].b64_json}"
